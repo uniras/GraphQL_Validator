@@ -5,20 +5,29 @@ from validator import gqlValidator, gqlCustomScalarType
 class TestValueType(gqlCustomScalarType):
     """
     テスト用のカスタムスカラー型
+
+    ・0から100までの整数を受け付け、それ以外の値や整数以外は基本的にエラーとする。
+    ・ただし浮動小数点値の場合は小数点を切り捨て整数に変換した上で範囲チェックを行う。
     """
     def __init__(self):
-        # スカラ型名と説明の設定
+        """
+        スカラ型名と説明の設定
+        """
         super().__init__("TestValue", "A number between 0 and 100")
 
-    # バリデーション
     def check_value(self, value) -> int:
-        # 型のチェックと変換
+        """
+        値の型変換と範囲のチェック
+        """
+        # 型の確認および変換
         if isinstance(value, int):
             num = value
         else:
             try:
+                # 整数値に変換できる場合はそのまま変換
                 num = int(value)
             except ValueError:
+                # 整数値に変換できない場合は一度浮動小数点値として変換した上で整数に変換
                 # ここで変換に失敗した場合は例外が送出される
                 num = int(float(value))
 
