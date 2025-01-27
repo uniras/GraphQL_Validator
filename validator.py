@@ -6,7 +6,6 @@ class gqlValidator:
     """
     GraphQLのスキーマを使ってJSONデータをバリデーションするクラス
     """
-
     def __init__(self, schema_definition_source: str, validation_type_name: str, custom_scalar_types: list = None) -> None:
         """
         コンストラクタ
@@ -27,7 +26,7 @@ class gqlValidator:
         # スキーマの構築
         self.schema = build_schema(self.base_input + schema_definition_source)
 
-        # カスタムスカラー型の追加
+        # カスタムスカラー型の置き換え
         if custom_scalar_types is not None and isinstance(custom_scalar_types, list) and len(custom_scalar_types) > 0:
             for custom_scalar_type in custom_scalar_types:
                 if isinstance(custom_scalar_type, gqlCustomScalarType):
@@ -39,6 +38,8 @@ class gqlValidator:
                 else:
                     # 無関係の型の値が指定された場合はエラー
                     raise ValueError("Invalid custom scalar type.")
+
+                # GraphQLスキーマコードで定義したカスタムスカラー型をPythonクラスで定義したカスタムスカラー型に置き換え(このように置き換えないと正しくバリデーションされない)
                 self.schema.type_map[scalar_type.name].__dict__.update(scalar_type.__dict__)
 
     def validate_json(self, input_json_data: str) -> None:
