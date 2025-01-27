@@ -30,7 +30,15 @@ class gqlValidator:
         # カスタムスカラー型の追加
         if custom_scalar_types is not None and isinstance(custom_scalar_types, list) and len(custom_scalar_types) > 0:
             for custom_scalar_type in custom_scalar_types:
-                scalar_type = custom_scalar_type.scalar if isinstance(custom_scalar_type, gqlCustomScalarType) else custom_scalar_type
+                if isinstance(custom_scalar_type, gqlCustomScalarType):
+                    # このライブラリのヘルパークラスから継承したカスタムスカラー型の場合は、ヘルパークラス内で生成されているカスタムスカラーを取得
+                    scalar_type = custom_scalar_type.scalar
+                elif isinstance(custom_scalar_type, GraphQLScalarType):
+                    # 既存のGraphQLScalarTypeから定義されたカスタムスカラー型の場合はそのまま使用
+                    scalar_type = custom_scalar_type
+                else:
+                    # 無関係の型の値が指定された場合はエラー
+                    raise ValueError("Invalid custom scalar type.")
                 self.schema.type_map[scalar_type.name].__dict__.update(scalar_type.__dict__)
 
     def validate_json(self, input_json_data: str) -> None:
@@ -66,7 +74,7 @@ class gqlValidator:
 
 class gqlCustomScalarType:
     """
-    カスタムスカラー型の定義
+    カスタムスカラー型を定義するためのヘルパークラス
     """
     def __init__(self, name: str, description: str):
         """
