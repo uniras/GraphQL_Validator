@@ -59,14 +59,19 @@ data = json.loads(jsondata)
 
 # バリデータの作成
 validator = gqlValidator(gql, "TestType!", [TestValueType()])
-validator.validate_json(jsondata)
 
-print("Validation successful")
+# データのバリデーション(正常)
+try:
+    validator.validate_json(jsondata)
+    print("Validation successful")
+except ValueError as e:
+    print(f"Validation failed: {e}")
+
 
 # データの変更
 data["math"] = 800
 
-# データのバリデーション
+# データのバリデーション(異常1)
 try:
     validator.validate(data)
     print("Validation successful")
@@ -76,7 +81,7 @@ except ValueError as e:
 # データの変更
 data["math"] = "invalid"
 
-# データのバリデーション
+# データのバリデーション(異常2)
 try:
     validator.validate(data)
 except ValueError as e:
